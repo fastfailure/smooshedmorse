@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
-const WORDLIST: &str = "./enable1.txt";
+const WORDLIST: &str = "input/wordlist";
 
 pub fn get_all_words() -> Vec<String> {
     let mut res: Vec<String> = Vec::new();
