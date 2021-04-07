@@ -18,7 +18,7 @@ fn morse_char_to_merse(morse_char: &str) -> Vec<bool> {
     merse_chars
 }
 
-pub fn merse_to_morse(merse: &Vec<bool>) -> String {
+pub fn merse_to_morse(merse: &[bool]) -> String {
     let mut morse = String::new();
     for ch in merse {
         morse.push(match ch {

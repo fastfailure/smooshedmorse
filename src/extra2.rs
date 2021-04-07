@@ -42,14 +42,14 @@ fn find_first_with_many_dashes(all_merse_words: &Vec<Vec<bool>>) -> Option<&Vec<
             return Some(word);
         }
     }
-    return None;
+    None
 }
 
-fn count_consecutive_dashes(merse_word: &Vec<bool>) -> u32 {
+fn count_consecutive_dashes(merse_word: &[bool]) -> u32 {
     let mut count: u32 = 0;
     let mut higher_count: u32 = 0;
     for i in merse_word {
-        if *i == true {
+        if *i {
             count += 1
         } else {
             count = 0

@@ -30,7 +30,7 @@ pub fn run() -> Result<Vec<String>, &'static str> {
     Ok(palindrome_words)
 }
 
-fn find_palindrome(smooshedmerses: &Vec<Vec<bool>>) -> Vec<usize> {
+fn find_palindrome(smooshedmerses: &[Vec<bool>]) -> Vec<usize> {
     let mut indexes: Vec<usize> = Vec::new();
     for (i, w) in smooshedmerses.iter().enumerate() {
         if is_palindrome(w) {
@@ -40,13 +40,14 @@ fn find_palindrome(smooshedmerses: &Vec<Vec<bool>>) -> Vec<usize> {
     indexes
 }
 
-fn is_palindrome(smooshedmerse: &Vec<bool>) -> bool {
+fn is_palindrome(smooshedmerse: &[bool]) -> bool {
     // Rely on dots being false and dashes being true
-    let reversed: Vec<bool> = smooshedmerse.iter().rev().copied().collect();
-    if *smooshedmerse == reversed {
-        return true;
+    for (d, i) in smooshedmerse.iter().zip(smooshedmerse.iter().rev()) {
+        if d != i {
+            return false;
+        }
     }
-    false
+    true
 }
 
 #[cfg(test)]

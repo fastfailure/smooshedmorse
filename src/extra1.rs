@@ -40,7 +40,7 @@ pub fn run() -> Result<Vec<String>, &'static str> {
 }
 
 /// Return a map of each input code and his frequency
-fn count_smooshedmorse(all_merse_words: &Vec<Vec<bool>>) -> HashMap<Vec<bool>, u32> {
+fn count_smooshedmorse(all_merse_words: &[Vec<bool>]) -> HashMap<Vec<bool>, u32> {
     let mut map: HashMap<Vec<bool>, u32> = HashMap::new();
     for c in all_merse_words.iter().cloned() {
         *map.entry(c).or_insert(0) += 1;
@@ -53,13 +53,10 @@ fn get_higher_counted(merse_count_map: HashMap<Vec<bool>, u32>) -> Vec<Vec<bool>
     let mut higher_count: u32 = STARTING_FREQUENCY;
     let mut higher_codes: Vec<Vec<bool>> = Vec::new();
     for (m, c) in merse_count_map {
-        match MAX_FREQUENCY_ALLOWED {
-            Some(max) => {
-                if c > max {
-                    continue;
-                }
+        if let Some(max) = MAX_FREQUENCY_ALLOWED {
+            if c > max {
+                continue;
             }
-            None => {}
         }
         if c > higher_count {
             log::trace!("Got a new higher count: {}", c);

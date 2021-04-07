@@ -40,7 +40,7 @@ pub fn filter_words_by_lenght(words: Vec<String>, letters: usize) -> Vec<String>
     given_lenght_words
 }
 
-fn find_balanced(smooshedmerses: &Vec<Vec<bool>>) -> Vec<usize> {
+fn find_balanced(smooshedmerses: &[Vec<bool>]) -> Vec<usize> {
     let mut indexes: Vec<usize> = Vec::new();
     for (i, w) in smooshedmerses.iter().enumerate() {
         if is_balanced(w) {
@@ -50,13 +50,13 @@ fn find_balanced(smooshedmerses: &Vec<Vec<bool>>) -> Vec<usize> {
     indexes
 }
 
-fn is_balanced(smooshedmerse: &Vec<bool>) -> bool {
+fn is_balanced(smooshedmerse: &[bool]) -> bool {
     // Return true if given smooshed word has same number of true and false
     // Rely on dots being false and dashes being true
     let mut dotcount: u32 = 0;
     let mut dashcount: u32 = 0;
     for elem in smooshedmerse.iter().copied() {
-        if elem == true {
+        if elem {
             dashcount += 1;
         } else {
             dotcount += 1;
