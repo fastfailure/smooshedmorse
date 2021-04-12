@@ -97,4 +97,3 @@ mod tests {
     // #[test]
     // pub fn word_to_smooshedmerse(word: &str) -> Result<Vec<bool>, &'static str> {
 }
-// pub fn word_to_smooshedmorse(word: &str) -> Result<String, &'static str> {

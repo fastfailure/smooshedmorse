@@ -36,7 +36,7 @@ pub fn run() -> Result<Vec<String>, &'static str> {
     Ok(vec![morse_many_dashes_word])
 }
 
-fn find_first_with_many_dashes(all_merse_words: &Vec<Vec<bool>>) -> Option<&Vec<bool>> {
+fn find_first_with_many_dashes(all_merse_words: &[Vec<bool>]) -> Option<&Vec<bool>> {
     for word in all_merse_words {
         if count_consecutive_dashes(word) >= DASHES_NUMBER_SEARCHED {
             return Some(word);

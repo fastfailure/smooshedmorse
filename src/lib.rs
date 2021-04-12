@@ -1,3 +1,6 @@
+/// Normally, you would indicate where one letter ends and the next begins, for instance
+/// with a space between the letters' codes, but for this challenge, just smoosh all the
+/// coded letters together into a single string consisting of only dashes and dots.
 pub mod decode;
 pub mod encode;
 pub mod input;
@@ -8,20 +11,14 @@ mod extra1;
 mod extra2;
 mod extra3;
 mod extra4;
-mod extra5;
 mod wordlist;
+
+use std::process;
 
 use input::Config;
 use input::Method;
-use serde_json::json;
-use std::process;
 
-fn print_result(words: Vec<String>) {
-    let json_words = json!(words);
-    println!("{}", json_words);
-}
-
-pub fn run(config: Config) {
+pub fn run(config: Config) -> Result<Vec<String>, &'static str> {
     let res = match config.method {
         // Method::Encode => encode::encode(config.word.unwrap().clone()),
         // Method::Decode => decode::decode(config.word.unwrap().clone()),
@@ -31,11 +28,10 @@ pub fn run(config: Config) {
         Method::Extra2 => extra2::run(),
         Method::Extra3 => extra3::run(),
         Method::Extra4 => extra4::run(),
-        Method::Extra5 => extra5::run(),
     };
     if let Err(e) = res {
         log::error!("Application error: {}", e);
         process::exit(1);
     };
-    print_result(res.unwrap());
+    res
 }

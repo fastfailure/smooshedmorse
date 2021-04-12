@@ -1,8 +1,6 @@
-/// Normally, you would indicate where one letter ends and the next begins, for instance
-/// with a space between the letters' codes, but for this challenge, just smoosh all the
-/// coded letters together into a single string consisting of only dashes and dots.
 use std::env;
 use std::process;
+use serde_json::json;
 
 use smooshedmorse::input::get_config;
 use smooshedmorse::run;
@@ -14,5 +12,10 @@ fn main() {
         log::error!("Problem parsing arguments: {}", err);
         process::exit(1);
     });
-    run(config);
+    print_result(run(config).unwrap());
+}
+
+fn print_result(words: Vec<String>) {
+    let json_words = json!(words);
+    println!("{}", json_words);
 }
