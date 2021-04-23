@@ -43,7 +43,7 @@ pub fn validate_morse_str(morse_str: &str) -> bool {
         return true;
     }
     log::error!("{} is NOT a valid morse string", morse_str);
-    return false;
+    false
 }
 
 #[cfg(test)]

@@ -6,7 +6,6 @@ pub enum Method {
     Extra2,
     Extra3,
     Extra4,
-    Extra5,
 }
 
 #[derive(Debug, PartialEq)] // PartialEq needed for test
@@ -53,10 +52,6 @@ pub fn get_config(args: &[String]) -> Result<Config, &'static str> {
         },
         "extra4" => Config {
             method: Method::Extra4,
-            word: None,
-        },
-        "extra5" => Config {
-            method: Method::Extra5,
             word: None,
         },
         _ => return Err("Wrong verb argument"),
@@ -117,13 +112,6 @@ mod tests {
             get_config(&["programname".to_string(), "extra4".to_string()]),
             Ok(Config {
                 method: Method::Extra4,
-                word: None
-            })
-        );
-        assert_eq!(
-            get_config(&["programname".to_string(), "extra5".to_string()]),
-            Ok(Config {
-                method: Method::Extra5,
                 word: None
             })
         );

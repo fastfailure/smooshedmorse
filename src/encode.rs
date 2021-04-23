@@ -6,8 +6,8 @@ pub fn encode(word: String) -> Result<Vec<String>, &'static str> {
     log::info!("Encoding: {}", word);
     let smooshedmerse = word_to_smooshedmerse(&word);
     match smooshedmerse {
-        Err(err) => return Err(err),
-        Ok(sm) => return Ok(vec![merse_to_morse(&sm)]),
+        Err(err) => Err(err),
+        Ok(sm) => Ok(vec![merse_to_morse(&sm)]),
     }
 }
 
@@ -97,4 +97,3 @@ mod tests {
     // #[test]
     // pub fn word_to_smooshedmerse(word: &str) -> Result<Vec<bool>, &'static str> {
 }
-// pub fn word_to_smooshedmorse(word: &str) -> Result<String, &'static str> {

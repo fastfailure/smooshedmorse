@@ -30,7 +30,7 @@ pub fn decode_merse(smooshedmerse_word: Vec<bool>) -> Result<Vec<String>, &'stat
     Ok(res)
 }
 
-pub fn all_words_to_smooshedmerse(all_words: &Vec<String>) -> Vec<Vec<bool>> {
+pub fn all_words_to_smooshedmerse(all_words: &[String]) -> Vec<Vec<bool>> {
     // this is the slow function
     let mut all_merse_words: Vec<Vec<bool>> = Vec::new();
     for word in all_words {
@@ -43,12 +43,12 @@ pub fn all_words_to_smooshedmerse(all_words: &Vec<String>) -> Vec<Vec<bool>> {
 }
 
 pub fn find_merse_corresponding_words(
-    merse_word: &Vec<bool>,
-    all_merse_words: &Vec<Vec<bool>>,
+    merse_word: &[bool],
+    all_merse_words: &[Vec<bool>],
 ) -> Vec<usize> {
     let mut indexes: Vec<usize> = Vec::new();
-    for (i, word) in all_merse_words.into_iter().enumerate() {
-        if word == merse_word {
+    for (i, word) in all_merse_words.iter().enumerate() {
+        if *word == merse_word {
             log::debug!("Found: {:?} at {}", word, i);
             indexes.push(i);
         }

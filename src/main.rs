@@ -1,53 +1,55 @@
-/// Normally, you would indicate where one letter ends and the next begins, for instance
-/// with a space between the letters' codes, but for this challenge, just smoosh all the
-/// coded letters together into a single string consisting of only dashes and dots.
-mod decode;
-mod encode;
-mod extra1;
-mod extra2;
-mod extra3;
-mod extra4;
-mod extra5;
-mod input;
-mod merses;
-mod morses;
-mod wordlist;
-
-use input::get_config;
-use input::Config;
-use input::Method;
 use serde_json::json;
 use std::env;
 use std::process;
+
+use smooshedmorse::decode;
+use smooshedmorse::encode;
+use smooshedmorse::extra1;
+use smooshedmorse::extra2;
+use smooshedmorse::extra3;
+use smooshedmorse::extra4;
+use smooshedmorse::input::get_config;
+use smooshedmorse::input::Config;
+use smooshedmorse::input::Method;
+
+pub fn run(config: Config) -> Result<Vec<String>, &'static str> {
+    let res = match config.method {
+        Method::Encode => encode::encode(config.word.unwrap()),
+        Method::Decode => decode::decode(config.word.unwrap()),
+        Method::Extra1 => extra1::run(),
+        Method::Extra2 => extra2::run(),
+        Method::Extra3 => extra3::run(),
+        Method::Extra4 => extra4::run(),
+    };
+    if let Err(e) = res {
+        log::error!("Application error: {}", e);
+        process::exit(1);
+    };
+    res
+}
 
 fn print_result(words: Vec<String>) {
     let json_words = json!(words);
     println!("{}", json_words);
 }
 
-fn run(config: Config) {
-    let res = match config.method {
-        Method::Encode => encode::encode(config.word.unwrap().clone()),
-        Method::Decode => decode::decode(config.word.unwrap().clone()),
-        Method::Extra1 => extra1::run(),
-        Method::Extra2 => extra2::run(),
-        Method::Extra3 => extra3::run(),
-        Method::Extra4 => extra4::run(),
-        Method::Extra5 => extra5::run(),
-    };
-    if let Err(e) = res {
-        log::error!("Application error: {}", e);
-        process::exit(1);
-    };
-    print_result(res.unwrap());
-}
-
 fn main() {
     env_logger::init();
+    let doc = "
+Usage:
+smooshedmorse encode <English word>
+sdecodemooshedmorse decode <Smooshedmorse word>
+smooshedmorse [extra1|extra2|extra3|extra4]
+
+ Examples:
+smooshedmorse encode Horse
+sdecodemooshedmorse decode ....---.-.....
+";
     let args: Vec<String> = env::args().collect();
     let config = get_config(&args).unwrap_or_else(|err| {
         log::error!("Problem parsing arguments: {}", err);
+        println!("{}", doc);
         process::exit(1);
     });
-    run(config);
+    print_result(run(config).unwrap());
 }
