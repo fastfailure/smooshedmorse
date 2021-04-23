@@ -35,9 +35,20 @@ fn print_result(words: Vec<String>) {
 
 fn main() {
     env_logger::init();
+    let doc = "
+Usage:
+smooshedmorse encode <English word>
+sdecodemooshedmorse decode <Smooshedmorse word>
+smooshedmorse [extra1|extra2|extra3|extra4]
+
+ Examples:
+smooshedmorse encode Horse
+sdecodemooshedmorse decode ....---.-.....
+";
     let args: Vec<String> = env::args().collect();
     let config = get_config(&args).unwrap_or_else(|err| {
         log::error!("Problem parsing arguments: {}", err);
+        println!("{}", doc);
         process::exit(1);
     });
     print_result(run(config).unwrap());
