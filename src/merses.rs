@@ -1,16 +1,19 @@
+/// merse: memory efficient morse
+/// . = false
+/// - = true
 use crate::morses;
+use morses::{DASH, DOT};
 use std::collections::HashMap;
 
-// merse: memory efficient morse
-// . = false
-// - = true
+const FALSE_CHAR: char = DOT;
+const TRUE_CHAR: char = DASH;
 
 fn morse_char_to_merse(morse_char: &str) -> Vec<bool> {
     let mut merse_chars: Vec<bool> = Vec::new();
     for ch in morse_char.chars() {
         merse_chars.push(match ch {
-            '.' => false,
-            '-' => true,
+            FALSE_CHAR => false,
+            TRUE_CHAR => true,
             _ => panic!(),
         });
     }
@@ -22,8 +25,8 @@ pub fn merse_to_morse(merse: &[bool]) -> String {
     let mut morse = String::new();
     for ch in merse {
         morse.push(match ch {
-            false => '.',
-            true => '-',
+            false => FALSE_CHAR,
+            true => TRUE_CHAR,
         });
     }
     log::trace!("{:?}->{}", merse, morse);

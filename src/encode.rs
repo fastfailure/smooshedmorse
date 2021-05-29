@@ -21,7 +21,7 @@ pub fn word_to_smooshedmerse(word: &str) -> Result<Vec<bool>, &'static str> {
         let mc = char_to_merse(ch);
         merse.push(mc);
     }
-    let encoded: Vec<bool> = merse.into_iter().flatten().collect(); // <3
+    let encoded: Vec<bool> = merse.into_iter().flatten().collect();
     log::trace!("{}->{:?}", word, encoded);
     Ok(encoded)
 }
@@ -41,14 +41,7 @@ pub fn word_to_smooshedmorse(word: &str) -> Result<String, &'static str> {
 }
 
 pub fn validate_ascii(word: &str) -> bool {
-    if !word
-        .chars()
-        // .filter(|c| !c.is_ascii_alphabetic())
-        // .collect::<Vec<_>>();
-        .all(char::is_alphabetic)
-    {
-        // log::info!("Non ASCII alphabetic chars: {:?}", non_ascii_alphabetic);
-        // if !non_ascii_alphabetic.is_empty() {
+    if !word.chars().all(char::is_alphabetic) {
         log::error!(
             "Word `{}` is NOT valid, it must contain only ASCII alphabetic characters",
             word
@@ -75,25 +68,27 @@ mod tests {
     }
 
     #[test]
-    fn test_encode() {
+    fn test_word_to_smooshedmorse() {
+        assert!(word_to_smooshedmorse("a ").is_err());
+        assert!(word_to_smooshedmorse("b b").is_err());
+        assert_eq!(word_to_smooshedmorse(""), Ok(String::from("")));
         assert_eq!(
-            encode("carlotta".to_string()),
-            Ok(vec!["-.-..-.-..-..-----.-".to_string()])
-        );
-        assert_eq!(
-            encode("Carlotta".to_string()),
-            Ok(vec!["-.-..-.-..-..-----.-".to_string()])
-        );
-        assert!(
-            encode("C3rr3t0".to_string()).is_err(),
-            "Word to be encoded must contain only ASCII alphabetic characters"
-        );
-        assert!(
-            encode("C rr t ".to_string()).is_err(),
-            "Word to be encoded must contain only ASCII alphabetic characters"
-        );
+            word_to_smooshedmorse("Carlotta"),
+            Ok(String::from("-.-..-.-..-..-----.-"))
+        )
     }
 
-    // #[test]
-    // pub fn word_to_smooshedmerse(word: &str) -> Result<Vec<bool>, &'static str> {
+    #[test]
+    fn test_word_to_smooshedmerse() {
+        assert!(word_to_smooshedmerse("a ").is_err());
+        assert!(word_to_smooshedmerse("b b").is_err());
+        assert_eq!(word_to_smooshedmerse(""), Ok(vec![]));
+        assert_eq!(
+            word_to_smooshedmerse("Carlotta"),
+            Ok(vec![
+                true, false, true, false, false, true, false, true, false, false, true, false,
+                false, true, true, true, true, true, false, true
+            ])
+        );
+    }
 }
