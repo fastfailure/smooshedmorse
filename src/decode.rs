@@ -60,9 +60,6 @@ pub fn find_merse_corresponding_words(
 mod tests {
     use super::*;
 
-    // #[test]
-    // fn test_decode() {}
-
     #[test]
     fn test_find_merse_corresponding_words() {
         assert_eq!(
@@ -106,10 +103,4 @@ mod tests {
             ]
         );
     }
-
-    // #[test]
-    // fn test_decode_merse() {
-    // too long...
-    // assert_eq!(decode_merse(), Ok());
-    // }
 }

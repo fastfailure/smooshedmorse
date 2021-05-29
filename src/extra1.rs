@@ -75,10 +75,6 @@ fn get_higher_counted(merse_count_map: HashMap<Vec<bool>, u32>) -> Vec<Vec<bool>
 mod tests {
     use super::*;
 
-    // #[test]
-    // fn test_run()
-    //  fn run() -> Result<Vec<String>, &'static str> {
-
     #[test]
     fn test_count_smooshedmorse() {
         let mut testmap: HashMap<Vec<bool>, u32> = HashMap::new();

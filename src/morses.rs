@@ -1,10 +1,12 @@
 use std::collections::HashMap;
 
-const ALPHABET: [char; 26] = [
+pub const ALPHABET: [char; 26] = [
     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
     't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
-const MORSE: &str = ".- -... -.-. -.. . ..-. --. .... .. .--- -.- .-.. -- -. --- .--. --.- .-. ... - ..- ...- .-- -..- -.-- --..";
+pub const DOT: char = '.';
+pub const DASH: char = '-';
+pub const MORSE: &str = ".- -... -.-. -.. . ..-. --. .... .. .--- -.- .-.. -- -. --- .--. --.- .-. ... - ..- ...- .-- -..- -.-- --..";
 
 pub fn get_morse_code() -> HashMap<char, &'static str> {
     let morse_seq: Vec<&str> = MORSE.split(' ').collect();
@@ -38,7 +40,7 @@ pub fn char_to_morse(ch: char) -> String {
 
 pub fn validate_morse_str(morse_str: &str) -> bool {
     // if only . and -
-    if morse_str.chars().all(|c| matches!(c, '.' | '-')) {
+    if morse_str.chars().all(|c| matches!(c, DOT | DASH)) {
         log::debug!("{} is a valid morse string", morse_str);
         return true;
     }

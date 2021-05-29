@@ -29,8 +29,8 @@ pub fn get_all_words() -> Vec<String> {
 //     }
 // }
 
-// The output is wrapped in a Result to allow matching on errors
-// Returns an Iterator to the Reader of the lines of the file.
+/// Returns an Iterator to the Reader of the lines of the file.
+/// The output is wrapped in a Result to allow matching on errors
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
 where
     P: AsRef<Path>,
@@ -41,9 +41,10 @@ where
 
 #[cfg(test)]
 mod tests {
-    // use super::*;
+    use super::*;
 
     #[test]
-    fn test_get_all_words() {}
-    // fn test_get_all_words() -> Vec<&'static str> {
+    fn test_get_all_words_length() {
+        assert_eq!(get_all_words().len(), 172823);
+    }
 }
