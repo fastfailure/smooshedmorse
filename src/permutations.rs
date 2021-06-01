@@ -9,6 +9,8 @@ use crate::merses::smooshedmorse_to_merse;
 use crate::morses::validate_morse_str;
 use crate::morses::ALPHABET;
 use itertools::Itertools;
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -67,26 +69,25 @@ struct SegmentChars {
     merse_take: Vec<bool>,
     left: Vec<char>,
     source: Vec<char>,
-    amount: usize,
+    perm_size: usize,
     permutations: Vec<Vec<char>>,
 }
 
 impl SegmentChars {
-    fn init(chars: &[char], amount: usize) -> Self {
-        let amount = if amount > chars.len() {
+    fn init(chars: &[char], perm_size: usize) -> Self {
+        let perm_size = if perm_size > chars.len() {
             chars.len()
         } else {
-            amount
+            perm_size
         };
         let permutations = chars
-            .to_owned()
+            .to_vec()
             .into_iter()
-            .permutations(amount)
-            .into_iter()
-            .collect();
+            .permutations(perm_size)
+            .collect::<Vec<Vec<char>>>();
         SegmentChars {
             source: chars.to_owned(),
-            amount,
+            perm_size,
             take: vec![],
             merse_take: chars_to_smooshedmerse(&[]),
             left: vec![],
@@ -118,16 +119,16 @@ impl SegmentChars {
 }
 
 fn random_alphabet() -> String {
-    let mut rc = SegmentChars::init(&ALPHABET, ALPHABET.len());
-    rc.new_perm();
-    rc.take.into_iter().collect()
+    let mut alphabet: Vec<char> = ALPHABET.to_vec().into_iter().collect();
+    alphabet.shuffle(&mut thread_rng());
+    alphabet.into_iter().collect()
 }
 
 /// Do all segchs match with input?
 fn check_for_match(input: &[bool], segchs: &HashMap<usize, SegmentChars>) -> bool {
     let mut i = 0;
     for (_, c) in segchs.iter() {
-        if c.merse_take == input[i..=(i + c.merse_take.len())] {
+        if c.merse_take != input[i..(i + c.merse_take.len())] {
             return false;
         }
         i += c.merse_take.len()
@@ -141,12 +142,7 @@ fn algo(
     mut i: usize,
     segchs: &mut HashMap<usize, SegmentChars>,
 ) -> (usize, Option<Vec<Vec<char>>>) {
-    log::debug!(
-        "Entering algorithm level #{}, source: {:?}, {:?}",
-        &i,
-        &input,
-        &segchs
-    );
+    log::debug!("Entering algorithm level #{}", &i);
     loop {
         segchs.get_mut(&i).unwrap().new_perm();
         if segchs.get(&i).unwrap().take.is_empty() {
@@ -167,7 +163,7 @@ fn algo(
                 return (i, Some(vec![char_combi]));
             }
             i += 1;
-            let segch_new = SegmentChars::init(&segchs.get(&i).unwrap().left, increment);
+            let segch_new = SegmentChars::init(&segchs.get(&(i - 1)).unwrap().left, increment);
             segchs.insert(i, segch_new);
             let (i, step) = algo(input, increment, i, segchs);
             match step {
@@ -197,6 +193,12 @@ mod tests {
 
     // #[test]
     // fn find_permutations(merse_alpha_perm: &[bool]) -> Vec<Vec<char>> {}
+
+    // #[test]
+    // fn check_for_match(input: &[bool], segchs: &HashMap<usize, SegmentChars>) -> bool {
+
+    // #[test]
+    // fn chars_to_smooshedmerse(chars: &[char]) -> Vec<bool> {
 
     #[test]
     fn test_validate_smalpha() {

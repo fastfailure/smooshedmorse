@@ -59,7 +59,7 @@ pub fn get_config(args: &[String]) -> Result<Config, &'static str> {
         },
         "permutations" => {
             let w = if args.len() == 3 {
-                Some(args[3].clone())
+                Some(args[2].clone())
             } else if args.len() == 2 {
                 None
             } else {
