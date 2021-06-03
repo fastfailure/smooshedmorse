@@ -14,7 +14,7 @@ use rand::thread_rng;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
-const INCREMENT: u8 = 3;
+const INCREMENT: u8 = 5;
 
 pub fn run(smooshed_alphabet_permutation: Option<String>) -> Result<Vec<String>, &'static str> {
     let smalpha: String = match smooshed_alphabet_permutation {
@@ -184,22 +184,31 @@ fn algo(
     increment: usize,
     mut i: usize,
     segchs: &mut HashMap<usize, SegmentChars>,
-) -> (usize, Option<Vec<Vec<char>>>) {
+) -> Option<Vec<Vec<char>>> {
     log::info!(
-        "Entering algorithm level #{}. Input: {}. Matched: {}",
+        "Entering algorithm level #{}. Matched: {}",
         &i,
-        merse_to_morse(input),
         get_taken(segchs)
     );
     loop {
+        // log::trace!(
+        //     "Get {} from {:?}",
+        //     i,
+        //     segchs.keys().collect::<Vec<&usize>>()
+        // );
         segchs.get_mut(&i).unwrap().new_perm();
         if segchs.get(&i).unwrap().take.is_empty() {
-            log::trace!("No more combinations, exiting level #{}", i);
-            i -= 1;
-            return (i, None);
+            let failing = segchs.remove(&i).unwrap();
+            log::debug!(
+                "No match on permutations for {:?}, cleaning and exiting level #{}",
+                failing,
+                i
+            );
+            // non funzionava se diminuivo i qua e lo passavo...
+            return None;
         }
         if check_for_match(input, segchs) {
-            log::info!(
+            log::debug!(
                 "Match on segment #{}: {:?} ({}))",
                 &i,
                 segchs.get(&i).unwrap().take,
@@ -213,17 +222,24 @@ fn algo(
                     char_combi.append(&mut matching_seg.take);
                     log::trace!("Growing result ({}): {:?}", ii, char_combi);
                 }
-                return (i, Some(vec![char_combi]));
+                return Some(vec![char_combi]); // reached deeper level, resurfacing
             }
             let left = &segchs.get(&i).unwrap().left;
-            log::info!("Left to match: {:?}", left);
+            log::debug!("Left to match: {:?}", left);
             let segch_new = SegmentChars::init(left, increment);
             i += 1;
             segchs.insert(i, segch_new);
-            let (i, step) = algo(input, increment, i, segchs);
+            let step = algo(input, increment, i, segchs);
             match step {
-                Some(res) => return (i, Some(res)),
-                None => continue,
+                Some(res) => return Some(res), // ascent after success
+                None => {
+                    i -= 1;
+                    log::debug!(
+                        "Deeper level has failed, trying another permutation on level #{}",
+                        i
+                    );
+                    continue;
+                }
             }
         }
     }
@@ -235,7 +251,11 @@ fn find_permutations(merse_alpha_perm: &[bool], increment: u8) -> Vec<Vec<char>>
     let i = 0;
     let segch0 = SegmentChars::init(&random_alphabet().chars().collect::<Vec<char>>(), increment);
     segchs.insert(i, segch0);
-    let (_i, res) = algo(merse_alpha_perm, increment, i, &mut segchs);
+    log::info!(
+        "Trying to find source alphabet permutation for '{}'",
+        merse_to_morse(&merse_alpha_perm),
+    );
+    let res = algo(merse_alpha_perm, increment, i, &mut segchs);
     match res {
         None => {
             log::error!("FAILURE, no match for {}", merse_to_morse(merse_alpha_perm));
