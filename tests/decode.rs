@@ -1,8 +1,6 @@
 use smooshedmorse::decode::decode;
 use smooshedmorse::decode::decode_merse;
 
-// mock use crate::wordlist::get_all_words;
-
 #[test]
 fn test_decode() {
     assert_eq!(

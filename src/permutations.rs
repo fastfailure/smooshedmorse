@@ -14,7 +14,7 @@ use rand::thread_rng;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
-const INCREMENT: u8 = 5;
+const INCREMENT: u8 = 4;
 
 pub fn run(smooshed_alphabet_permutation: Option<String>) -> Result<Vec<String>, &'static str> {
     let smalpha: String = match smooshed_alphabet_permutation {
@@ -303,7 +303,6 @@ mod tests {
         segch1.left = segch1.get_left(&segch1.source, &segch1.take);
         segchs.insert(1, segch1);
 
-        env_logger::init();
         println!("segch: {:?}", &segchs);
 
         assert!(!check_for_match(&[], &segchs));
