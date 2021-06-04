@@ -3,7 +3,7 @@ use crate::merses::merse_to_morse;
 use crate::morses::char_to_morse;
 
 pub fn encode(word: String) -> Result<Vec<String>, &'static str> {
-    log::info!("Encoding: {}", word);
+    log::debug!("Encoding: {}", word);
     let smooshedmerse = word_to_smooshedmerse(&word);
     match smooshedmerse {
         Err(err) => Err(err),

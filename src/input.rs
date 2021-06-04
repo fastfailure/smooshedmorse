@@ -6,6 +6,7 @@ pub enum Method {
     Extra2,
     Extra3,
     Extra4,
+    Permutations,
 }
 
 #[derive(Debug, PartialEq)] // PartialEq needed for test
@@ -21,21 +22,23 @@ pub fn get_config(args: &[String]) -> Result<Config, &'static str> {
     log::debug!("args: {:?}", args);
     let config: Config = match args[1].as_str() {
         "encode" => {
-            let w = args[2].clone();
-            // TODO if not enough arguments...
-            // TODO if too many arguments...
+            if args.len() != 3 {
+                return Err("Wrong number of arguments, must be 2");
+            }
+            let w = Some(args[2].clone());
             Config {
                 method: Method::Encode,
-                word: Some(w),
+                word: w,
             }
         }
         "decode" => {
-            let w = args[2].clone();
-            // TODO if not enough arguments...
-            // TODO if too many arguments...
+            if args.len() != 3 {
+                return Err("Wrong number of arguments, must be 2");
+            }
+            let w = Some(args[2].clone());
             Config {
                 method: Method::Decode,
-                word: Some(w),
+                word: w,
             }
         }
         "extra1" => Config {
@@ -54,6 +57,19 @@ pub fn get_config(args: &[String]) -> Result<Config, &'static str> {
             method: Method::Extra4,
             word: None,
         },
+        "permutations" => {
+            let w = if args.len() == 3 {
+                Some(args[2].clone())
+            } else if args.len() == 2 {
+                None
+            } else {
+                return Err("Too many arguments");
+            };
+            Config {
+                method: Method::Permutations,
+                word: w,
+            }
+        }
         _ => return Err("Wrong verb argument"),
     };
     Ok(config)

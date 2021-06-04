@@ -4,7 +4,7 @@ use crate::morses::validate_morse_str;
 use crate::wordlist::get_all_words;
 
 pub fn decode(smooshedmorse_word: String) -> Result<Vec<String>, &'static str> {
-    log::info!("Decoding: {}", smooshedmorse_word);
+    log::debug!("Decoding: {}", smooshedmorse_word);
     if !validate_morse_str(&smooshedmorse_word) {
         return Err("Morse string must contain only . and -");
     };
@@ -15,14 +15,14 @@ pub fn decode(smooshedmorse_word: String) -> Result<Vec<String>, &'static str> {
 pub fn decode_merse(smooshedmerse_word: Vec<bool>) -> Result<Vec<String>, &'static str> {
     let all_words: Vec<String> = get_all_words();
 
-    log::info!("Converting all words to smooshedmorse...");
+    log::debug!("Converting all words to smooshedmorse...");
     let all_merse_words = all_words_to_smooshedmerse(&all_words);
-    log::info!("Converting all words to smooshedmorse: done");
+    log::debug!("Converting all words to smooshedmorse: done");
 
-    log::info!("Searching for corresponding words...");
+    log::debug!("Searching for corresponding words...");
     let corresponding_positions: Vec<usize> =
         find_merse_corresponding_words(&smooshedmerse_word, &all_merse_words);
-    log::info!("Found: {:?}", corresponding_positions);
+    log::debug!("Found: {:?}", corresponding_positions);
     let mut res: Vec<String> = Vec::new();
     for i in corresponding_positions {
         res.push(all_words[i].to_string());
