@@ -1,6 +1,12 @@
+use crate::input::InputLines;
+use clap::{App, AppSettings, SubCommand};
+use color_eyre::Report;
 use serde_json::json;
 use std::env;
 use std::process;
+use tracing::error;
+use tracing::trace;
+use tracing_subscriber::EnvFilter;
 
 use smooshedmorse::decode;
 use smooshedmorse::encode;
@@ -24,7 +30,7 @@ pub fn run(config: Config) -> Result<Vec<String>, &'static str> {
         Method::Permutations => permutations::run(config.word),
     };
     if let Err(e) = res {
-        log::error!("Application error: {}", e);
+        error!("Application error: {}", e);
         process::exit(1);
     };
     res
@@ -35,8 +41,9 @@ fn print_result(words: Vec<String>) {
     println!("{}", json_words);
 }
 
-fn main() {
-    env_logger::init();
+fn main() -> Result<(), Report> {
+    setup()?;
+
     let doc = "
 Usage:
 smooshedmorse encode <English word>
@@ -54,9 +61,47 @@ smooshedmorse permutations .--...-.-.-.....-.--........----.-.-..---.---.--.--.-
 ";
     let args: Vec<String> = env::args().collect();
     let config = get_config(&args).unwrap_or_else(|err| {
-        log::error!("Problem parsing arguments: {}", err);
+        error!("Problem parsing arguments: {}", err);
         println!("{}", doc);
         process::exit(1);
     });
     print_result(run(config).unwrap());
+
+    let input_par = "INPUT";
+    let common_input_arg = "[INPUT] 'Sets the input file to use, read from stdin otherwise'";
+    let matches = App::new("aoc18")
+        .about("Advent of Code 2018: https://adventofcode.com/2018")
+        .setting(AppSettings::SubcommandRequiredElseHelp)
+        .subcommand(
+            SubCommand::with_name("day1")
+                .about("Day 1 challenges")
+                .arg_from_usage(common_input_arg),
+        )
+        .get_matches();
+    trace!(?matches);
+    match matches.subcommand() {
+        ("day5", Some(submatches)) => {
+            trace!(?submatches);
+            day5::star1(InputLines::from(submatches.value_of(input_par)))?;
+            day5::star2(InputLines::from(submatches.value_of(input_par)))?;
+        }
+        _ => unreachable!(),
+    }
+    Ok(())
+}
+
+fn setup() -> Result<(), Report> {
+    if std::env::var("RUST_LIB_BACKTRACE").is_err() {
+        std::env::set_var("RUST_LIB_BACKTRACE", "1")
+    }
+    color_eyre::install()?;
+
+    if std::env::var("RUST_LOG").is_err() {
+        std::env::set_var("RUST_LOG", "warn,aoc18=info")
+    }
+    tracing_subscriber::fmt::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
+
+    Ok(())
 }
