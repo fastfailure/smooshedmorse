@@ -2,27 +2,27 @@ use crate::encode::word_to_smooshedmerse;
 use crate::merses::smooshedmorse_to_merse;
 use crate::morses::validate_morse_str;
 use crate::wordlist::get_all_words;
+use color_eyre::Report;
+use tracing::debug;
 
-pub fn decode(smooshedmorse_word: String) -> Result<Vec<String>, &'static str> {
-    log::debug!("Decoding: {}", smooshedmorse_word);
-    if !validate_morse_str(&smooshedmorse_word) {
-        return Err("Morse string must contain only . and -");
-    };
-    let merse_word = smooshedmorse_to_merse(&smooshedmorse_word);
+pub fn decode(smooshedmorse_word: &str) -> Result<Vec<String>, Report> {
+    debug!("Decoding: {}", smooshedmorse_word);
+    validate_morse_str(smooshedmorse_word)?;
+    let merse_word = smooshedmorse_to_merse(smooshedmorse_word);
     decode_merse(merse_word)
 }
 
-pub fn decode_merse(smooshedmerse_word: Vec<bool>) -> Result<Vec<String>, &'static str> {
+pub fn decode_merse(smooshedmerse_word: Vec<bool>) -> Result<Vec<String>, Report> {
     let all_words: Vec<String> = get_all_words();
 
-    log::debug!("Converting all words to smooshedmorse...");
+    debug!("Converting all words to smooshedmorse...");
     let all_merse_words = all_words_to_smooshedmerse(&all_words);
-    log::debug!("Converting all words to smooshedmorse: done");
+    debug!("Converting all words to smooshedmorse: done");
 
-    log::debug!("Searching for corresponding words...");
+    debug!("Searching for corresponding words...");
     let corresponding_positions: Vec<usize> =
         find_merse_corresponding_words(&smooshedmerse_word, &all_merse_words);
-    log::debug!("Found: {:?}", corresponding_positions);
+    debug!("Found: {:?}", corresponding_positions);
     let mut res: Vec<String> = Vec::new();
     for i in corresponding_positions {
         res.push(all_words[i].to_string());
@@ -36,7 +36,7 @@ pub fn all_words_to_smooshedmerse(all_words: &[String]) -> Vec<Vec<bool>> {
     for word in all_words {
         let merse_word: Vec<bool> = word_to_smooshedmerse(word)
             .expect("Word with forbidden characters present in the word list");
-        log::debug!("Converted: {}", word);
+        debug!("Converted: {}", word);
         all_merse_words.push(merse_word);
     }
     all_merse_words
@@ -49,7 +49,7 @@ pub fn find_merse_corresponding_words(
     let mut indexes: Vec<usize> = Vec::new();
     for (i, word) in all_merse_words.iter().enumerate() {
         if *word == merse_word {
-            log::debug!("Found: {:?} at {}", word, i);
+            debug!("Found: {:?} at {}", word, i);
             indexes.push(i);
         }
     }

@@ -2,37 +2,38 @@ use crate::decode::all_words_to_smooshedmerse;
 use crate::decode::find_merse_corresponding_words;
 use crate::merses::merse_to_morse;
 use crate::wordlist::get_all_words;
+use color_eyre::Report;
+use tracing::info;
 
 const DASHES_NUMBER_SEARCHED: u32 = 15;
 
 /// autotomous encodes to .-..--------------..-..., which has 14 dashes in a row. Find
 /// the only word that has 15 dashes in a row.
-pub fn run() -> Result<Vec<String>, &'static str> {
+pub fn run() -> Result<Vec<String>, Report> {
     let all_words: Vec<String> = get_all_words();
 
-    log::info!("Converting all words to smooshedmorse...");
+    info!("Converting all words to smooshedmorse...");
     let all_merse_words = all_words_to_smooshedmerse(&all_words);
-    log::info!("Converting all words to smooshedmorse: done");
+    info!("Converting all words to smooshedmorse: done");
 
     let many_dashes_word: &Vec<bool> = find_first_with_many_dashes(&all_merse_words)
         .expect("Couldn't find a word with so many dashes!");
     let morse_many_dashes_word: String = merse_to_morse(many_dashes_word);
 
-    log::info!(
+    info!(
         "Found a word with {} dashes: {}",
-        DASHES_NUMBER_SEARCHED,
-        morse_many_dashes_word
+        DASHES_NUMBER_SEARCHED, morse_many_dashes_word
     );
 
     // display corresponding words in log
     let corresponding_positions: Vec<usize> =
         find_merse_corresponding_words(many_dashes_word, &all_merse_words);
-    log::info!("Found: {:?}", corresponding_positions);
+    info!("Found: {:?}", corresponding_positions);
     let mut decoded: Vec<String> = Vec::new();
     for i in corresponding_positions {
         decoded.push(all_words[i].to_string());
     }
-    log::info!("{}: {:?}", morse_many_dashes_word, decoded);
+    info!("{}: {:?}", morse_many_dashes_word, decoded);
     Ok(vec![morse_many_dashes_word])
 }
 

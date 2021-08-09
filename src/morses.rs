@@ -1,4 +1,6 @@
+use color_eyre::{eyre::eyre, Report};
 use std::collections::HashMap;
+use tracing::{error, trace};
 
 pub const ALPHABET: [char; 26] = [
     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
@@ -15,14 +17,14 @@ pub fn get_morse_code() -> HashMap<char, &'static str> {
         .copied()
         .zip(morse_seq.into_iter())
         .collect();
-    log::trace!("Morse: {:?}", mc);
+    trace!("Morse: {:?}", mc);
     mc
 }
 
 pub fn morse_to_char(morse_ch: &str) -> Option<char> {
     for (k, v) in &get_morse_code() {
         if *v == morse_ch {
-            log::trace!("{}->{}", morse_ch, k);
+            trace!("{}->{}", morse_ch, k);
             return Some(*k);
         }
     }
@@ -34,18 +36,18 @@ pub fn char_to_morse(ch: char) -> String {
         .get(&ch.to_ascii_lowercase())
         .expect("The character given is not present in morse code")
         .to_string();
-    log::trace!("{}->{}", ch, morse_ch);
+    trace!("{}->{}", ch, morse_ch);
     morse_ch
 }
 
-pub fn validate_morse_str(morse_str: &str) -> bool {
-    // if only . and -
+/// Valid morse string must contain only . and -
+pub fn validate_morse_str(morse_str: &str) -> Result<(), Report> {
     if morse_str.chars().all(|c| matches!(c, DOT | DASH)) {
-        log::debug!("{} is a valid morse string", morse_str);
-        return true;
+        trace!("{} is a valid morse string", morse_str);
+        return Ok(());
     }
-    log::error!("{} is NOT a valid morse string", morse_str);
-    false
+    error!(%morse_str, "Morse string must contain only . and -");
+    Err(eyre!("Not a valid morse string: `{}`", morse_str))
 }
 
 #[cfg(test)]
@@ -54,22 +56,20 @@ mod tests {
 
     #[test]
     fn test_validate() {
-        assert!(validate_morse_str("-"));
-        assert!(validate_morse_str("."));
-        assert!(validate_morse_str("-."));
-        assert!(validate_morse_str(
-            ".-.........................--------------------"
-        ));
-        assert!(validate_morse_str(".--.-"));
-        assert!(!validate_morse_str(".--.- "));
-        assert!(!validate_morse_str(".- .-."));
-        assert!(!validate_morse_str("a"));
-        assert!(!validate_morse_str("9"));
-        assert!(!validate_morse_str("!"));
-        assert!(!validate_morse_str("-.3-"));
-        assert!(!validate_morse_str("-♡"));
-        assert!(!validate_morse_str("_"));
-        assert!(!validate_morse_str("_."));
+        assert!(validate_morse_str("-").is_ok());
+        assert!(validate_morse_str(".").is_ok());
+        assert!(validate_morse_str("-.").is_ok());
+        assert!(validate_morse_str(".-.........................--------------------").is_ok());
+        assert!(validate_morse_str(".--.-").is_ok());
+        assert!(validate_morse_str(".--.- ").is_err());
+        assert!(validate_morse_str(".- .-.").is_err());
+        assert!(validate_morse_str("a").is_err());
+        assert!(validate_morse_str("9").is_err());
+        assert!(validate_morse_str("!").is_err());
+        assert!(validate_morse_str("-.3-").is_err());
+        assert!(validate_morse_str("-♡").is_err());
+        assert!(validate_morse_str("_").is_err());
+        assert!(validate_morse_str("_.").is_err());
     }
 
     #[test]

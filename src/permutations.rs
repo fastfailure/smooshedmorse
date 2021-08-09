@@ -8,22 +8,24 @@ use crate::encode::encode;
 use crate::merses::{merse_to_morse, smooshedmorse_to_merse};
 use crate::morses::validate_morse_str;
 use crate::morses::ALPHABET;
+use color_eyre::{eyre::eyre, Report};
 use itertools::Itertools;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use tracing::{debug, error, info, trace};
 
 const INCREMENT: u8 = 4;
 
-pub fn run(smooshed_alphabet_permutation: Option<String>) -> Result<Vec<String>, &'static str> {
+pub fn run(smooshed_alphabet_permutation: Option<&str>) -> Result<Vec<String>, Report> {
     let smalpha: String = match smooshed_alphabet_permutation {
-        Some(smalpha) => smalpha,
+        Some(smalpha) => smalpha.into(),
         None => {
             let random_alphabet = random_alphabet();
-            log::debug!("Alphabet permutation generated: {}", random_alphabet,);
-            let smalpha: String = encode(random_alphabet).unwrap().first().unwrap().clone();
-            log::info!(
+            debug!("Alphabet permutation generated: {}", random_alphabet,);
+            let smalpha: String = encode(&random_alphabet)?.first().unwrap().clone();
+            info!(
                 "Alphabet permutation not given, using a random one: {:?}",
                 smalpha,
             );
@@ -39,24 +41,22 @@ pub fn run(smooshed_alphabet_permutation: Option<String>) -> Result<Vec<String>,
         .collect::<Vec<String>>())
 }
 
-fn validate_smalpha(smalpha: &str) -> Result<(), &'static str> {
-    if !validate_morse_str(&smalpha) {
-        return Err("Invalid smooshed morse string");
-    }
+fn validate_smalpha(smalpha: &str) -> Result<(), Report> {
+    validate_morse_str(&smalpha)?;
     if smalpha.len() != smalpha_right_len() {
-        log::error!(
+        error!(
             "{} length is {}, must be {}",
             smalpha,
             smalpha.len(),
             smalpha_right_len()
         );
-        return Err("Wrong length of alphabet permutation");
+        return Err(eyre!("Wrong length of alphabet permutation"));
     }
     Ok(())
 }
 
 fn smalpha_right_len() -> usize {
-    encode(ALPHABET.iter().collect())
+    encode(&ALPHABET.iter().collect::<String>())
         .unwrap()
         .first()
         .unwrap()
@@ -65,7 +65,7 @@ fn smalpha_right_len() -> usize {
 
 fn chars_to_smooshedmerse(chars: &[char]) -> Vec<bool> {
     smooshedmorse_to_merse(
-        &encode(chars.iter().collect::<String>())
+        &encode(&chars.iter().collect::<String>())
             .unwrap()
             .first()
             .unwrap(),
@@ -117,11 +117,11 @@ impl SegmentChars {
         self.take = match self.permutations.pop() {
             Some(p) => p,
             None => {
-                log::trace!("No more permutations");
+                trace!("No more permutations");
                 vec![]
             }
         };
-        log::debug!("New permutation: {:?}", self.take);
+        trace!("New permutation: {:?}", self.take);
         self.merse_take = chars_to_smooshedmerse(&self.take);
         self.left = self.get_left(&self.source, &self.take);
     }
@@ -135,7 +135,7 @@ fn random_alphabet() -> String {
 
 /// Return true if all segchs match with input (in the correct order)
 fn check_for_match(input: &[bool], segchs: &HashMap<usize, SegmentChars>) -> bool {
-    log::trace!("Checking SegmentChars match on {:?}", input);
+    trace!("Checking SegmentChars match on {:?}", input);
     let mut i = 0;
     let mut n = 0;
     loop {
@@ -149,7 +149,7 @@ fn check_for_match(input: &[bool], segchs: &HashMap<usize, SegmentChars>) -> boo
             None => &[],
         };
         if c.merse_take != islice {
-            log::trace!(
+            trace!(
                 "Mismatch on {:?} vs. {:?} (#{}-{})",
                 c.merse_take,
                 islice,
@@ -158,7 +158,7 @@ fn check_for_match(input: &[bool], segchs: &HashMap<usize, SegmentChars>) -> boo
             );
             return false;
         }
-        log::trace!(
+        trace!(
             "Match on {:?} vs. {:?} (#{}-{})",
             c.merse_take,
             islice,
@@ -185,13 +185,13 @@ fn algo(
     mut i: usize,
     segchs: &mut HashMap<usize, SegmentChars>,
 ) -> Option<Vec<Vec<char>>> {
-    log::info!(
+    debug!(
         "Entering algorithm level #{}. Matched: {}",
         &i,
         get_taken(segchs)
     );
     loop {
-        // log::trace!(
+        // trace!(
         //     "Get {} from {:?}",
         //     i,
         //     segchs.keys().collect::<Vec<&usize>>()
@@ -199,7 +199,7 @@ fn algo(
         segchs.get_mut(&i).unwrap().new_perm();
         if segchs.get(&i).unwrap().take.is_empty() {
             let failing = segchs.remove(&i).unwrap();
-            log::debug!(
+            trace!(
                 "No match on permutations for {:?}, cleaning and exiting level #{}",
                 failing,
                 i
@@ -208,24 +208,24 @@ fn algo(
             return None;
         }
         if check_for_match(input, segchs) {
-            log::debug!(
+            trace!(
                 "Match on segment #{}: {:?} ({}))",
                 &i,
                 segchs.get(&i).unwrap().take,
                 merse_to_morse(&segchs.get(&i).unwrap().merse_take)
             );
             if segchs.get(&i).unwrap().left.is_empty() {
-                log::info!("Success on level #{}! Creating result", i);
+                info!("Success on level #{}! Creating result", i);
                 let mut char_combi = Vec::new();
                 for ii in 0..=i {
                     let matching_seg: &mut SegmentChars = segchs.get_mut(&ii).unwrap();
                     char_combi.append(&mut matching_seg.take);
-                    log::trace!("Growing result ({}): {:?}", ii, char_combi);
+                    trace!("Growing result ({}): {:?}", ii, char_combi);
                 }
                 return Some(vec![char_combi]); // reached deeper level, resurfacing
             }
             let left = &segchs.get(&i).unwrap().left;
-            log::debug!("Left to match: {:?}", left);
+            trace!("Left to match: {:?}", left);
             let segch_new = SegmentChars::init(left, increment);
             i += 1;
             segchs.insert(i, segch_new);
@@ -234,7 +234,7 @@ fn algo(
                 Some(res) => return Some(res), // ascent after success
                 None => {
                     i -= 1;
-                    log::debug!(
+                    trace!(
                         "Deeper level has failed, trying another permutation on level #{}",
                         i
                     );
@@ -251,14 +251,14 @@ fn find_permutations(merse_alpha_perm: &[bool], increment: u8) -> Vec<Vec<char>>
     let i = 0;
     let segch0 = SegmentChars::init(&random_alphabet().chars().collect::<Vec<char>>(), increment);
     segchs.insert(i, segch0);
-    log::info!(
+    info!(
         "Trying to find source alphabet permutation for '{}'",
         merse_to_morse(&merse_alpha_perm),
     );
     let res = algo(merse_alpha_perm, increment, i, &mut segchs);
     match res {
         None => {
-            log::error!("FAILURE, no match for {}", merse_to_morse(merse_alpha_perm));
+            error!("FAILURE, no match for {}", merse_to_morse(merse_alpha_perm));
             vec![vec![]]
         }
         Some(r) => r,

@@ -4,8 +4,8 @@ use smooshedmorse::decode::decode_merse;
 #[test]
 fn test_decode() {
     assert_eq!(
-        decode(String::from("-.-..-.-..-")),
-        Ok(vec![String::from("caret"), String::from("ceca")])
+        decode("-.-..-.-..-").unwrap(),
+        vec![String::from("caret"), String::from("ceca")]
     );
 }
 
@@ -14,7 +14,8 @@ fn test_decode_merse() {
     assert_eq!(
         decode_merse(vec![
             true, false, true, false, false, true, false, true, false, false, true
-        ]),
-        Ok(vec![String::from("caret"), String::from("ceca")])
+        ])
+        .unwrap(),
+        vec![String::from("caret"), String::from("ceca")]
     );
 }

@@ -1,10 +1,7 @@
-use crate::input::InputLines;
+// use crate::input::InputLines;
 use clap::{App, AppSettings, SubCommand};
 use color_eyre::Report;
 use serde_json::json;
-use std::env;
-use std::process;
-use tracing::error;
 use tracing::trace;
 use tracing_subscriber::EnvFilter;
 
@@ -14,27 +11,7 @@ use smooshedmorse::extra1;
 use smooshedmorse::extra2;
 use smooshedmorse::extra3;
 use smooshedmorse::extra4;
-use smooshedmorse::input::get_config;
-use smooshedmorse::input::Config;
-use smooshedmorse::input::Method;
 use smooshedmorse::permutations;
-
-pub fn run(config: Config) -> Result<Vec<String>, &'static str> {
-    let res = match config.method {
-        Method::Encode => encode::encode(config.word.unwrap()),
-        Method::Decode => decode::decode(config.word.unwrap()),
-        Method::Extra1 => extra1::run(),
-        Method::Extra2 => extra2::run(),
-        Method::Extra3 => extra3::run(),
-        Method::Extra4 => extra4::run(),
-        Method::Permutations => permutations::run(config.word),
-    };
-    if let Err(e) = res {
-        error!("Application error: {}", e);
-        process::exit(1);
-    };
-    res
-}
 
 fn print_result(words: Vec<String>) {
     let json_words = json!(words);
@@ -43,47 +20,86 @@ fn print_result(words: Vec<String>) {
 
 fn main() -> Result<(), Report> {
     setup()?;
-
-    let doc = "
-Usage:
-smooshedmorse encode <English word>
-sdecodemooshedmorse decode <Smooshedmorse word>
-smooshedmorse [extra1|extra2|extra3|extra4]
-smooshedmorse permutations [<smooshedmorse alphabet permutation>]
-
-permutations command implement smooshedmorse challenge 2: https://www.reddit.com/r/dailyprogrammer/comments/cn6gz5/20190807_challenge_380_intermediate_smooshed/
-If no alphabet permutation is given a random one is used.
-
- Examples:
-smooshedmorse encode Horse
-smooshedmorse decode ....---.-.....
-smooshedmorse permutations .--...-.-.-.....-.--........----.-.-..---.---.--.--.-.-....-..-...-.---..--.----..
-";
-    let args: Vec<String> = env::args().collect();
-    let config = get_config(&args).unwrap_or_else(|err| {
-        error!("Problem parsing arguments: {}", err);
-        println!("{}", doc);
-        process::exit(1);
-    });
-    print_result(run(config).unwrap());
-
-    let input_par = "INPUT";
-    let common_input_arg = "[INPUT] 'Sets the input file to use, read from stdin otherwise'";
-    let matches = App::new("aoc18")
-        .about("Advent of Code 2018: https://adventofcode.com/2018")
+    let matches = App::new("smooshedmorse")
+        .about("Smooshed Morse encoding and decoding
+Normally, you would indicate where one letter ends and the next begins, for instance
+with a space between the letters' codes, but in smooshed morse  all the
+coded letters are smooshed together into a single string consisting of only dashes and dots.
+https://www.reddit.com/r/dailyprogrammer/comments/cmd1hb/20190805_challenge_380_easy_smooshed_morse_code_1/")
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .subcommand(
-            SubCommand::with_name("day1")
-                .about("Day 1 challenges")
-                .arg_from_usage(common_input_arg),
+            SubCommand::with_name("encode")
+                .about("Encode a word to smooshedmorse.
+ Example:
+smooshedmorse encode Horse")
+                .arg_from_usage("<WORD> Word to be encoded to smooshedmorse"),
+        )
+        .subcommand(
+            SubCommand::with_name("decode")
+                .about("Decode a smooshedmorse English word.
+ Example:
+smooshedmorse decode ....---.-.....")
+                .arg_from_usage("<SMOOSHEDMORSE> Smooshedmorse word to decode"),
+        )
+        .subcommand(
+            SubCommand::with_name("permutations")
+                .about("Given a smooshed Morse code encoding of a permutation of the alphabet, find one of the permutations it encodes. Implement smooshedmorse challenge 2: https://www.reddit.com/r/dailyprogrammer/comments/cn6gz5/20190807_challenge_380_intermediate_smooshed/
+ Example:
+smooshedmorse permutations .--...-.-.-.....-.--........----.-.-..---.---.--.--.-.-....-..-...-.---..--.----..")
+                .arg_from_usage(
+                    "[ALPHABET_PERMUTATION] Smooshedmorse alphabet permutation to decode, if not given a random one is generated"
+                    ),
+        )
+        .subcommand(
+            SubCommand::with_name("extra1")
+        )
+        .subcommand(
+            SubCommand::with_name("extra2")
+        )
+        .subcommand(
+            SubCommand::with_name("extra3")
+        )
+        .subcommand(
+            SubCommand::with_name("extra4")
         )
         .get_matches();
     trace!(?matches);
     match matches.subcommand() {
-        ("day5", Some(submatches)) => {
+        ("encode", Some(submatches)) => {
             trace!(?submatches);
-            day5::star1(InputLines::from(submatches.value_of(input_par)))?;
-            day5::star2(InputLines::from(submatches.value_of(input_par)))?;
+            // day5::star1(InputLines::from(submatches.value_of(input_par)))?;
+            let res = encode::encode(submatches.value_of("WORD").unwrap())?; // safe unwrap, positional argument is mandatory
+            print_result(res);
+        }
+        ("decode", Some(submatches)) => {
+            trace!(?submatches);
+            let res = decode::decode(submatches.value_of("SMOOSHEDMORSE").unwrap())?; // idem
+            print_result(res);
+        }
+        ("permutations", Some(submatches)) => {
+            trace!(?submatches);
+            let res = permutations::run(submatches.value_of("ALPHABET_PERMUTATION"))?;
+            print_result(res);
+        }
+        ("extra1", Some(submatches)) => {
+            trace!(?submatches);
+            let res = extra1::run()?;
+            print_result(res);
+        }
+        ("extra2", Some(submatches)) => {
+            trace!(?submatches);
+            let res = extra2::run()?;
+            print_result(res);
+        }
+        ("extra3", Some(submatches)) => {
+            trace!(?submatches);
+            let res = extra3::run()?;
+            print_result(res);
+        }
+        ("extra4", Some(submatches)) => {
+            trace!(?submatches);
+            let res = extra4::run()?;
+            print_result(res);
         }
         _ => unreachable!(),
     }
@@ -97,7 +113,7 @@ fn setup() -> Result<(), Report> {
     color_eyre::install()?;
 
     if std::env::var("RUST_LOG").is_err() {
-        std::env::set_var("RUST_LOG", "warn,aoc18=info")
+        std::env::set_var("RUST_LOG", "warn,smooshedmorse=info")
     }
     tracing_subscriber::fmt::fmt()
         .with_env_filter(EnvFilter::from_default_env())

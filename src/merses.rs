@@ -4,6 +4,7 @@
 use crate::morses;
 use morses::{DASH, DOT};
 use std::collections::HashMap;
+use tracing::trace;
 
 const FALSE_CHAR: char = DOT;
 const TRUE_CHAR: char = DASH;
@@ -17,7 +18,7 @@ fn morse_char_to_merse(morse_char: &str) -> Vec<bool> {
             _ => panic!(),
         });
     }
-    log::trace!("{}->{:?}", morse_char, merse_chars);
+    trace!("{}->{:?}", morse_char, merse_chars);
     merse_chars
 }
 
@@ -29,20 +30,20 @@ pub fn merse_to_morse(merse: &[bool]) -> String {
             true => TRUE_CHAR,
         });
     }
-    log::trace!("{:?}->{}", merse, morse);
+    trace!("{:?}->{}", merse, morse);
     morse
 }
 
 pub fn smooshedmorse_to_merse(word: &str) -> Vec<bool> {
     let merse = morse_char_to_merse(word);
-    log::trace!("{}->{:?}", word, merse);
+    trace!("{}->{:?}", word, merse);
     merse
 }
 
 pub fn merse_to_char(merse_ch: Vec<bool>) -> Option<char> {
     for (k, v) in &get_merse_code() {
         if *v == merse_ch {
-            log::trace!("{:?}->{}", merse_ch, k);
+            trace!("{:?}->{}", merse_ch, k);
             return Some(*k);
         }
     }
@@ -52,7 +53,7 @@ pub fn merse_to_char(merse_ch: Vec<bool>) -> Option<char> {
 pub fn char_to_merse(ch: char) -> Vec<bool> {
     let morse_ch = morses::char_to_morse(ch);
     let merse_ch = morse_char_to_merse(&morse_ch);
-    log::trace!("{}->{}", ch, morse_ch);
+    trace!("{}->{}", ch, morse_ch);
     merse_ch
 }
 
@@ -62,7 +63,7 @@ pub fn get_merse_code() -> HashMap<char, Vec<bool>> {
     for (k, v) in &morse {
         merse.insert(*k, morse_char_to_merse(v));
     }
-    log::trace!("Merse code: {:?}", merse);
+    trace!("Merse code: {:?}", merse);
     merse
 }
 

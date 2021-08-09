@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
+use tracing::info;
 
 const WORDLIST: &str = "input/wordlist";
 
@@ -15,7 +16,7 @@ pub fn get_all_words() -> Vec<String> {
             }
         }
     }
-    log::info!("Wordlist loaded from {}", WORDLIST);
+    info!("Wordlist loaded from {}", WORDLIST);
     res
 }
 

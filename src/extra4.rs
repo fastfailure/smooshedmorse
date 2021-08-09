@@ -2,20 +2,22 @@ use crate::decode::all_words_to_smooshedmerse;
 use crate::extra3::filter_words_by_lenght;
 use crate::merses::merse_to_morse;
 use crate::wordlist::get_all_words;
+use color_eyre::Report;
+use tracing::info;
 
 const LETTERS_NUMBER: usize = 6;
 
 /// protectorate is 12 letters long and encodes to .--..-.----.-.-.----.-..--., which is
 /// a palindrome (i.e. the string is the same when reversed). Find the only 13-letter
 /// word that encodes to a palindrome.
-pub fn run() -> Result<Vec<String>, &'static str> {
+pub fn run() -> Result<Vec<String>, Report> {
     let all_words: Vec<String> = get_all_words();
 
     let filtered_words = filter_words_by_lenght(all_words, LETTERS_NUMBER);
 
-    log::info!("Converting all words to smooshedmorse...");
+    info!("Converting all words to smooshedmorse...");
     let merse_words = all_words_to_smooshedmerse(&filtered_words);
-    log::info!("Converting all words to smooshedmorse: done");
+    info!("Converting all words to smooshedmorse: done");
 
     let palindrome_merse: Vec<usize> = find_palindrome(&merse_words);
     let mut palindrome_words: Vec<String> = Vec::new();
@@ -24,7 +26,7 @@ pub fn run() -> Result<Vec<String>, &'static str> {
     }
 
     for i in palindrome_merse {
-        log::info!("Found palindrome: {}", merse_to_morse(&merse_words[i]));
+        info!("Found palindrome: {}", merse_to_morse(&merse_words[i]));
     }
 
     Ok(palindrome_words)
