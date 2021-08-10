@@ -22,7 +22,7 @@ with a space between the letters' codes, but in smooshed morse  all the
 coded letters are smooshed together into a single string consisting of only dashes and dots.
 https://www.reddit.com/r/dailyprogrammer/comments/cmd1hb/20190805_challenge_380_easy_smooshed_morse_code_1/")
         .setting(AppSettings::SubcommandRequiredElseHelp)
-                .arg_from_usage("-j, --json Serialize output to JSON")
+                .arg_from_usage("-j, --json 'Serialize output to JSON'")
         .subcommand(
             SubCommand::with_name("encode")
                 .about("Encode a word to smooshedmorse.\nExample:\nsmooshedmorse encode Horse")
@@ -38,8 +38,8 @@ https://www.reddit.com/r/dailyprogrammer/comments/cmd1hb/20190805_challenge_380_
             SubCommand::with_name("permutations")
                 .about("Given a smooshed Morse code encoding of a permutation of the alphabet, find one of the permutations it encodes. Implement smooshedmorse challenge 2: https://www.reddit.com/r/dailyprogrammer/comments/cn6gz5/20190807_challenge_380_intermediate_smooshed/\nExample:\nsmooshedmorse permutations -- '.--...-.-.-.....-.--........----.-.-..---.---.--.--.-.-....-..-...-.---..--.----..'")
                 .arg_from_usage(
-                    "[ALPHABET_PERMUTATION] Smooshedmorse alphabet permutation to decode, if not given a random one is generated"
-                    ),
+                    "[ALPHABET_PERMUTATION] 'Smooshedmorse alphabet permutation to decode, if not given a random one is generated'"
+                    )
         )
         .subcommand(
             SubCommand::with_name("extra1")
