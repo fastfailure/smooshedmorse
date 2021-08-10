@@ -1,20 +1,22 @@
 use crate::decode::all_words_to_smooshedmerse;
 use crate::merses::merse_to_morse;
 use crate::wordlist::get_all_words;
+use color_eyre::Report;
+use tracing::info;
 
 const LETTERS_NUMBER: usize = 21;
 
 /// Call a word perfectly balanced if its code has the same number of dots as dashes.
 /// counterdemonstrations is one of two 21-letter words that's perfectly balanced. Find
 /// the other one.
-pub fn run() -> Result<Vec<String>, &'static str> {
-    let all_words: Vec<String> = get_all_words();
+pub fn run() -> Result<Vec<String>, Report> {
+    let all_words: Vec<String> = get_all_words(None)?;
 
     let filtered_words = filter_words_by_lenght(all_words, LETTERS_NUMBER);
 
-    log::info!("Converting all words to smooshedmorse...");
+    info!("Converting all words to smooshedmorse...");
     let merse_words = all_words_to_smooshedmerse(&filtered_words);
-    log::info!("Converting all words to smooshedmorse: done");
+    info!("Converting all words to smooshedmorse: done");
 
     let balanced_merse: Vec<usize> = find_balanced(&merse_words);
     let mut balanced_words: Vec<String> = Vec::new();
@@ -23,7 +25,7 @@ pub fn run() -> Result<Vec<String>, &'static str> {
     }
 
     for i in balanced_merse {
-        log::info!("Found balanced: {}", merse_to_morse(&merse_words[i]));
+        info!("Found balanced: {}", merse_to_morse(&merse_words[i]));
     }
 
     Ok(balanced_words)
