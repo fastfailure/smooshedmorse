@@ -5,16 +5,19 @@ use crate::wordlist::get_all_words;
 use color_eyre::Report;
 use tracing::debug;
 
-pub fn decode(smooshedmorse_word: &str) -> Result<Vec<String>, Report> {
+pub fn decode(smooshedmorse_word: &str, wordlist: Option<&str>) -> Result<Vec<String>, Report> {
     let smooshedmorse_word = smooshedmorse_word.trim();
     debug!("Decoding: {}", smooshedmorse_word);
     validate_morse_str(smooshedmorse_word)?;
     let merse_word = smooshedmorse_to_merse(smooshedmorse_word);
-    decode_merse(merse_word)
+    decode_merse(merse_word, wordlist)
 }
 
-pub fn decode_merse(smooshedmerse_word: Vec<bool>) -> Result<Vec<String>, Report> {
-    let all_words: Vec<String> = get_all_words();
+pub fn decode_merse(
+    smooshedmerse_word: Vec<bool>,
+    wordlist: Option<&str>,
+) -> Result<Vec<String>, Report> {
+    let all_words: Vec<String> = get_all_words(wordlist)?;
 
     debug!("Converting all words to smooshedmorse...");
     let all_merse_words = all_words_to_smooshedmerse(&all_words);

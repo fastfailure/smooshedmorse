@@ -11,7 +11,7 @@ const LETTERS_NUMBER: usize = 6;
 /// a palindrome (i.e. the string is the same when reversed). Find the only 13-letter
 /// word that encodes to a palindrome.
 pub fn run() -> Result<Vec<String>, Report> {
-    let all_words: Vec<String> = get_all_words();
+    let all_words: Vec<String> = get_all_words(None)?;
 
     let filtered_words = filter_words_by_lenght(all_words, LETTERS_NUMBER);
 

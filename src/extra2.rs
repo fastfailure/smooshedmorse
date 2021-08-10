@@ -10,7 +10,7 @@ const DASHES_NUMBER_SEARCHED: u32 = 15;
 /// autotomous encodes to .-..--------------..-..., which has 14 dashes in a row. Find
 /// the only word that has 15 dashes in a row.
 pub fn run() -> Result<Vec<String>, Report> {
-    let all_words: Vec<String> = get_all_words();
+    let all_words: Vec<String> = get_all_words(None)?;
 
     info!("Converting all words to smooshedmorse...");
     let all_merse_words = all_words_to_smooshedmerse(&all_words);

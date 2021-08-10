@@ -10,7 +10,7 @@ const LETTERS_NUMBER: usize = 21;
 /// counterdemonstrations is one of two 21-letter words that's perfectly balanced. Find
 /// the other one.
 pub fn run() -> Result<Vec<String>, Report> {
-    let all_words: Vec<String> = get_all_words();
+    let all_words: Vec<String> = get_all_words(None)?;
 
     let filtered_words = filter_words_by_lenght(all_words, LETTERS_NUMBER);
 

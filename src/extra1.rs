@@ -13,7 +13,7 @@ const STARTING_FREQUENCY: u32 = 0; // higher to optimize search, 12 is the highe
 /// The sequence -...-....-.--. is the code for four different words (needing, nervate,
 /// niding, tiling). Find the only sequence that's the code for 13 different words.
 pub fn run() -> Result<Vec<String>, Report> {
-    let all_words: Vec<String> = get_all_words();
+    let all_words: Vec<String> = get_all_words(None)?;
 
     info!("Converting all words to smooshedmorse...");
     let all_merse_words = all_words_to_smooshedmerse(&all_words);

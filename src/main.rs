@@ -26,12 +26,13 @@ https://www.reddit.com/r/dailyprogrammer/comments/cmd1hb/20190805_challenge_380_
         .subcommand(
             SubCommand::with_name("encode")
                 .about("Encode a word to smooshedmorse.\nExample:\nsmooshedmorse encode Horse")
-                .arg_from_usage("<WORD> Word to be encoded to smooshedmorse")
+                .arg_from_usage("<WORD> 'Word to be encoded to smooshedmorse'")
         )
         .subcommand(
             SubCommand::with_name("decode")
                 .about("Decode a smooshedmorse English word.\nExample:\nsmooshedmorse decode -- '....---.-.....'")
-                .arg_from_usage("<SMOOSHEDMORSE> Smooshedmorse word to decode (give it after --)"),
+                .arg_from_usage("-w, --words=[FILE] 'Word list file to use'")
+                .arg_from_usage("<SMOOSHEDMORSE> 'Smooshedmorse word to decode (give it after --)'")
         )
         .subcommand(
             SubCommand::with_name("permutations")
@@ -67,7 +68,10 @@ https://www.reddit.com/r/dailyprogrammer/comments/cmd1hb/20190805_challenge_380_
         }
         ("decode", Some(submatches)) => {
             trace!(?submatches);
-            let res = decode::decode(submatches.value_of("SMOOSHEDMORSE").unwrap())?; // idem
+            let res = decode::decode(
+                submatches.value_of("SMOOSHEDMORSE").unwrap(),
+                submatches.value_of("words"),
+            )?; // idem
             if matches.is_present("json") {
                 print_json(&res)
             } else {
