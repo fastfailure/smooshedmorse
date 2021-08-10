@@ -69,9 +69,9 @@ fn smalpha_right_len() -> usize {
 fn chars_to_smooshedmerse(chars: &[char]) -> Vec<bool> {
     smooshedmorse_to_merse(
         &encode(&chars.iter().collect::<String>())
-            .unwrap("No encoding output")
+            .expect("No encoding output")
             .first()
-            .unwrap("No encoding output"),
+            .expect("No encoding output"),
     )
 }
 
