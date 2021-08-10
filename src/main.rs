@@ -131,7 +131,7 @@ fn setup() -> Result<(), Report> {
     color_eyre::install()?;
 
     if std::env::var("RUST_LOG").is_err() {
-        std::env::set_var("RUST_LOG", "warn,smooshedmorse=info")
+        std::env::set_var("RUST_LOG", "warn,smooshedmorse=warn")
     }
     tracing_subscriber::fmt::fmt()
         .with_env_filter(EnvFilter::from_default_env())
