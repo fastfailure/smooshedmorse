@@ -24,7 +24,10 @@ pub fn run(smooshed_alphabet_permutation: Option<&str>) -> Result<Vec<String>, R
         None => {
             let random_alphabet = random_alphabet();
             debug!("Alphabet permutation generated: {}", random_alphabet,);
-            let smalpha: String = encode(&random_alphabet)?.first().unwrap().clone();
+            let smalpha: String = encode(&random_alphabet)?
+                .first()
+                .expect("Unexpected empty alphabet")
+                .clone();
             info!(
                 "Alphabet permutation not given, using a random one: {:?}",
                 smalpha,
@@ -57,18 +60,18 @@ fn validate_smalpha(smalpha: &str) -> Result<(), Report> {
 
 fn smalpha_right_len() -> usize {
     encode(&ALPHABET.iter().collect::<String>())
-        .unwrap()
+        .expect("Unexpected error encoding alphabet")
         .first()
-        .unwrap()
+        .expect("Unexpected empty alphabet")
         .len()
 }
 
 fn chars_to_smooshedmerse(chars: &[char]) -> Vec<bool> {
     smooshedmorse_to_merse(
         &encode(&chars.iter().collect::<String>())
-            .unwrap()
+            .unwrap("No encoding output")
             .first()
-            .unwrap(),
+            .unwrap("No encoding output"),
     )
 }
 
