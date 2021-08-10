@@ -6,6 +6,7 @@ use color_eyre::Report;
 use tracing::debug;
 
 pub fn decode(smooshedmorse_word: &str) -> Result<Vec<String>, Report> {
+    let smooshedmorse_word = smooshedmorse_word.trim();
     debug!("Decoding: {}", smooshedmorse_word);
     validate_morse_str(smooshedmorse_word)?;
     let merse_word = smooshedmorse_to_merse(smooshedmorse_word);

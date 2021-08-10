@@ -30,12 +30,12 @@ https://www.reddit.com/r/dailyprogrammer/comments/cmd1hb/20190805_challenge_380_
         )
         .subcommand(
             SubCommand::with_name("decode")
-                .about("Decode a smooshedmorse English word.\nExample:\nsmooshedmorse decode ....---.-.....")
-                .arg_from_usage("<SMOOSHEDMORSE> Smooshedmorse word to decode"),
+                .about("Decode a smooshedmorse English word.\nExample:\nsmooshedmorse decode -- '....---.-.....'")
+                .arg_from_usage("<SMOOSHEDMORSE> Smooshedmorse word to decode (give it after --)"),
         )
         .subcommand(
             SubCommand::with_name("permutations")
-                .about("Given a smooshed Morse code encoding of a permutation of the alphabet, find one of the permutations it encodes. Implement smooshedmorse challenge 2: https://www.reddit.com/r/dailyprogrammer/comments/cn6gz5/20190807_challenge_380_intermediate_smooshed/\nExample:\nsmooshedmorse permutations .--...-.-.-.....-.--........----.-.-..---.---.--.--.-.-....-..-...-.---..--.----..")
+                .about("Given a smooshed Morse code encoding of a permutation of the alphabet, find one of the permutations it encodes. Implement smooshedmorse challenge 2: https://www.reddit.com/r/dailyprogrammer/comments/cn6gz5/20190807_challenge_380_intermediate_smooshed/\nExample:\nsmooshedmorse permutations -- '.--...-.-.-.....-.--........----.-.-..---.---.--.--.-.-....-..-...-.---..--.----..'")
                 .arg_from_usage(
                     "[ALPHABET_PERMUTATION] Smooshedmorse alphabet permutation to decode, if not given a random one is generated"
                     ),
