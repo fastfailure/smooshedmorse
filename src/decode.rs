@@ -9,7 +9,7 @@ pub fn decode(smooshedmorse_word: &str, wordlist: Option<&str>) -> Result<Vec<St
     let smooshedmorse_word = smooshedmorse_word.trim();
     debug!("Decoding: {}", smooshedmorse_word);
     validate_morse_str(smooshedmorse_word)?;
-    let merse_word = smooshedmorse_to_merse(smooshedmorse_word);
+    let merse_word = smooshedmorse_to_merse(smooshedmorse_word)?;
     decode_merse(merse_word, wordlist)
 }
 

@@ -14,7 +14,7 @@ pub fn word_to_smooshedmerse(word: &str) -> Result<Vec<bool>, Report> {
     validate_ascii(&word)?;
     let mut merse: Vec<Vec<bool>> = Vec::new();
     for ch in word.chars() {
-        let mc = char_to_merse(ch);
+        let mc = char_to_merse(ch)?;
         merse.push(mc);
     }
     let encoded: Vec<bool> = merse.into_iter().flatten().collect();

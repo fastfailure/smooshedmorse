@@ -37,7 +37,7 @@ pub fn run(smooshed_alphabet_permutation: Option<&str>) -> Result<Vec<String>, R
     };
     validate_smalpha(&smalpha)?;
     let permutations_of_char: Vec<Vec<char>> =
-        find_permutations(&smooshedmorse_to_merse(&smalpha), INCREMENT);
+        find_permutations(&smooshedmorse_to_merse(&smalpha)?, INCREMENT)?;
     Ok(permutations_of_char
         .into_iter()
         .map(|alphchars| alphchars.into_iter().collect::<String>())
@@ -66,13 +66,14 @@ fn smalpha_right_len() -> usize {
         .len()
 }
 
-fn chars_to_smooshedmerse(chars: &[char]) -> Vec<bool> {
-    smooshedmorse_to_merse(
+fn chars_to_smooshedmerse(chars: &[char]) -> Result<Vec<bool>, Report> {
+    let smerse = smooshedmorse_to_merse(
         &encode(&chars.iter().collect::<String>())
             .expect("No encoding output")
             .first()
             .expect("No encoding output"),
-    )
+    )?;
+    Ok(smerse)
 }
 
 #[derive(Debug)]
@@ -101,7 +102,8 @@ impl SegmentChars {
             source: chars.to_owned(),
             perm_size,
             take: vec![],
-            merse_take: chars_to_smooshedmerse(&[]),
+            merse_take: chars_to_smooshedmerse(&[])
+                .expect("An empty str shouldn't contain invalid characters..."),
             left: vec![],
             permutations,
         }
@@ -116,7 +118,7 @@ impl SegmentChars {
             .collect();
         difference
     }
-    fn new_perm(&mut self) {
+    fn new_perm(&mut self) -> Result<(), Report> {
         self.take = match self.permutations.pop() {
             Some(p) => p,
             None => {
@@ -125,8 +127,9 @@ impl SegmentChars {
             }
         };
         trace!("New permutation: {:?}", self.take);
-        self.merse_take = chars_to_smooshedmerse(&self.take);
+        self.merse_take = chars_to_smooshedmerse(&self.take)?;
         self.left = self.get_left(&self.source, &self.take);
+        Ok(())
     }
 }
 
@@ -187,7 +190,7 @@ fn algo(
     increment: usize,
     mut i: usize,
     segchs: &mut HashMap<usize, SegmentChars>,
-) -> Option<Vec<Vec<char>>> {
+) -> Result<Option<Vec<Vec<char>>>, Report> {
     debug!(
         "Entering algorithm level #{}. Matched: {}",
         &i,
@@ -199,7 +202,7 @@ fn algo(
         //     i,
         //     segchs.keys().collect::<Vec<&usize>>()
         // );
-        segchs.get_mut(&i).unwrap().new_perm();
+        segchs.get_mut(&i).unwrap().new_perm()?;
         if segchs.get(&i).unwrap().take.is_empty() {
             let failing = segchs.remove(&i).unwrap();
             trace!(
@@ -208,7 +211,7 @@ fn algo(
                 i
             );
             // non funzionava se diminuivo i qua e lo passavo...
-            return None;
+            return Ok(None);
         }
         if check_for_match(input, segchs) {
             trace!(
@@ -225,16 +228,16 @@ fn algo(
                     char_combi.append(&mut matching_seg.take);
                     trace!("Growing result ({}): {:?}", ii, char_combi);
                 }
-                return Some(vec![char_combi]); // reached deeper level, resurfacing
+                return Ok(Some(vec![char_combi])); // reached deeper level, resurfacing
             }
             let left = &segchs.get(&i).unwrap().left;
             trace!("Left to match: {:?}", left);
             let segch_new = SegmentChars::init(left, increment);
             i += 1;
             segchs.insert(i, segch_new);
-            let step = algo(input, increment, i, segchs);
+            let step = algo(input, increment, i, segchs)?;
             match step {
-                Some(res) => return Some(res), // ascent after success
+                Some(res) => return Ok(Some(res)), // ascent after success
                 None => {
                     i -= 1;
                     trace!(
@@ -248,7 +251,7 @@ fn algo(
     }
 }
 
-fn find_permutations(merse_alpha_perm: &[bool], increment: u8) -> Vec<Vec<char>> {
+fn find_permutations(merse_alpha_perm: &[bool], increment: u8) -> Result<Vec<Vec<char>>, Report> {
     let increment: usize = increment as usize;
     let mut segchs: HashMap<usize, SegmentChars> = HashMap::new();
     let i = 0;
@@ -258,14 +261,15 @@ fn find_permutations(merse_alpha_perm: &[bool], increment: u8) -> Vec<Vec<char>>
         "Trying to find source alphabet permutation for '{}'",
         merse_to_morse(&merse_alpha_perm),
     );
-    let res = algo(merse_alpha_perm, increment, i, &mut segchs);
-    match res {
+    let res = algo(merse_alpha_perm, increment, i, &mut segchs)?;
+    let r = match res {
         None => {
             error!("FAILURE, no match for {}", merse_to_morse(merse_alpha_perm));
             vec![vec![]]
         }
         Some(r) => r,
-    }
+    };
+    Ok(r)
 }
 
 #[cfg(test)]
@@ -283,9 +287,9 @@ mod tests {
         let s1 = vec!['d', 'e', 'f'];
         let s2 = vec!['x', 'y', 'z'];
 
-        let m0 = chars_to_smooshedmerse(&s0);
-        let m1 = chars_to_smooshedmerse(&s1);
-        let m2 = chars_to_smooshedmerse(&s2);
+        let m0 = chars_to_smooshedmerse(&s0).unwrap();
+        let m1 = chars_to_smooshedmerse(&s1).unwrap();
+        let m2 = chars_to_smooshedmerse(&s2).unwrap();
         let mut chain_m01 = Vec::new(); // same length
         chain_m01.extend_from_slice(&m0); // longer
         chain_m01.extend_from_slice(&m1);
@@ -296,13 +300,13 @@ mod tests {
 
         let mut segch0 = SegmentChars::init(&s0, 3);
         segch0.take = s0.into_iter().collect();
-        segch0.merse_take = chars_to_smooshedmerse(&segch0.take);
+        segch0.merse_take = chars_to_smooshedmerse(&segch0.take).unwrap();
         segch0.left = segch0.get_left(&segch0.source, &segch0.take);
         segchs.insert(0, segch0);
 
         let mut segch1 = SegmentChars::init(&s1, 3);
         segch1.take = s1.into_iter().collect();
-        segch1.merse_take = chars_to_smooshedmerse(&segch1.take);
+        segch1.merse_take = chars_to_smooshedmerse(&segch1.take).unwrap();
         segch1.left = segch1.get_left(&segch1.source, &segch1.take);
         segchs.insert(1, segch1);
 
@@ -316,9 +320,9 @@ mod tests {
 
     #[test]
     fn test_chars_to_smooshedmerse() {
-        assert_eq!(chars_to_smooshedmerse(&['a']), vec![false, true]);
+        assert_eq!(chars_to_smooshedmerse(&['a']).unwrap(), vec![false, true]);
         assert_eq!(
-            chars_to_smooshedmerse(&['a', 'b', 'c']),
+            chars_to_smooshedmerse(&['a', 'b', 'c']).unwrap(),
             vec![false, true, true, false, false, false, true, false, true, false]
         );
     }
